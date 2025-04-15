@@ -31,7 +31,7 @@
     "webpack-cli": "^5.1.4"
   },
   "dependencies": {
-    "@kobalab/majiang-ai": "^1.0.13",
+    "@kobalab/majiang-ai": "file:../fever-majiang-ai",
     "@kobalab/majiang-core": "file:../fever-majiang-core",
     "@kobalab/majiang-ui": "file:../fever-majiang-ui",
     "@kobalab/tenhou-url-log": "^1.0.3",
