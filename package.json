@@ -34,7 +34,7 @@
     "@kobalab/majiang-ai": "file:../fever-majiang-ai",
     "@kobalab/majiang-core": "file:../fever-majiang-core",
     "@kobalab/majiang-ui": "file:../fever-majiang-ui",
-    "@kobalab/tenhou-url-log": "^1.0.3",
+    "@kobalab/tenhou-url-log": "^1.0.4",
     "jquery": "^3.7.1"
   }
 }
