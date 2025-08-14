@@ -9,6 +9,81 @@
 
 const preset = require('./conf/rule.json');
 
+export const threePlayerSimpleScore = {
+    oya: {
+        tsumo: {
+            1: [1000, 1000, 1000],
+            2: [2000, 2000, 2000],
+            3: [3000, 3000, 3000],
+            4: [6000, 6000, 6000],
+            5: [6000, 6000, 6000],
+            6: [9000, 9000, 9000],
+            7: [9000, 9000, 9000],
+            8: [12000, 12000, 12000],
+            9: [12000, 12000, 12000],
+            10: [12000, 12000, 12000],
+            11: [18000, 18000, 18000],
+            12: [18000, 18000, 18000],
+            13: [24000, 24000, 24000],
+            14: [24000, 24000, 24000],
+        },
+        ron: {
+            1: 2000,
+            2: 3000,
+            3: 6000,
+            4: 12000,
+            5: 12000,
+            6: 18000,
+            7: 18000,
+            8: 24000,
+            9: 24000,
+            10: 24000,
+            11: 36000,
+            12: 36000,
+            13: 48000,
+            14: 48000,
+        },
+    },
+    ko: {
+        tsumo: {
+            1: [1000, 1000],
+            2: [1000, 1000],
+            3: [1000, 3000],
+            4: [3000, 5000],
+            5: [3000, 5000],
+            6: [4000, 8000],
+            7: [4000, 8000],
+            8: [6000, 10000],
+            9: [6000, 10000],
+            10: [6000, 10000],
+            11: [8000, 16000],
+            12: [8000, 16000],
+            13: [12000, 20000],
+            14: [12000, 20000],
+        },
+        ron: {
+            1: 1000,
+            2: 2000,
+            3: 4000,
+            4: 8000,
+            5: 8000,
+            6: 12000,
+            7: 12000,
+            8: 16000,
+            9: 16000,
+            10: 16000,
+            11: 24000,
+            12: 24000,
+            13: 32000,
+            14: 32000,
+        },
+    },
+    special: {
+        nagashiManganAsYakuman: true,
+        noTenBappu: 1000,
+    },
+};
+
 function set_form(rule) {
 
     for (let key of Object.keys(rule)) {
@@ -16,7 +91,7 @@ function set_form(rule) {
         let value;
 
         if (key == '順位点') {
-            value = rule[key].find(n=>n.match(/\./)) ? 0 : 1;
+            value = rule[key].find(n => n.match(/\./)) ? 0 : 1;
             $('input[name="順位点四捨五入あり"]').val([value]);
             for (let i = 1; i < 4; i++) {
                 $('input[name="順位点"]').eq(i).val(rule[key][i]);
@@ -31,11 +106,10 @@ function set_form(rule) {
         }
 
         if ($(`input[name="${key}"]`).attr('type') == 'radio' ||
-            $(`input[name="${key}"]`).attr('type') == 'checkbox')
-        {
+            $(`input[name="${key}"]`).attr('type') == 'checkbox') {
             value = rule[key] === false ? [0]
-                  : rule[key] === true  ? [1]
-                  :                       [rule[key]];
+                : rule[key] === true ? [1]
+                    : [rule[key]];
         }
         else {
             value = rule[key];
@@ -87,10 +161,10 @@ function get_form() {
 
 function round_point(p, round) {
     p = isNaN(p) ? '0'
-      : + p > 0  ? '+' + (+ p)
-      :            ''  + (+ p);
-    if (round) p.replace(/\.\d*$/,'');
-    else       p = ! p.match(/\./) ? p + '.0' : p;
+        : + p > 0 ? '+' + (+ p)
+            : '' + (+ p);
+    if (round) p.replace(/\.\d*$/, '');
+    else p = !p.match(/\./) ? p + '.0' : p;
     return p;
 }
 
@@ -107,8 +181,7 @@ function repair_point() {
 
 function repair_gang() {
     if (+ $('input[name="裏ドラあり"]:checked').val()
-        && + $('input[name="カンドラあり"]:checked').val())
-    {
+        && + $('input[name="カンドラあり"]:checked').val()) {
         $('input[name="カン裏あり"]').prop('disabled', false);
     }
     else {
@@ -120,7 +193,7 @@ function repair_gang() {
     }
     else {
         $('input[name="カンドラ後乗せ"]').prop('disabled', true)
-                                        .prop('checked', false);
+            .prop('checked', false);
     }
 }
 
@@ -134,70 +207,73 @@ function repair_damanguan() {
 }
 
 function unsaved() {
-    $(window).on('beforeunload', (ev)=>{
+    $(window).on('beforeunload', (ev) => {
         const message = 'ページを離れますがよろしいですか？';
         ev.returnValue = message;
         return message;
     });
 }
 
-$(function(){
+// 以下のUI関連コードはブラウザ環境かつjQueryが存在する場合のみ実行
+if (typeof window !== 'undefined' && typeof $ !== 'undefined') {
+    $(function () {
 
-    for (let key of Object.keys(preset)) {
-        $('select[name="プリセット"]').append($('<option>').val(key).text(key));
-    }
-    if (localStorage.getItem('Majiang.rule')) {
-        $('select[name="プリセット"]').append($('<option>')
-                                    .val('-').text('カスタムルール'));
-        $('select[name="プリセット"]').val('-');
-    }
-
-    let rule = Majiang.rule(
-                    JSON.parse(localStorage.getItem('Majiang.rule')||'{}'));
-    set_form(rule);
-
-    $('input[name="配給原点"]').on('change', function(){
-        let p = $(this).val();
-        if (isNaN(p) || p <= 0) $(this).val(Majiang.rule()['配給原点']);
-    });
-    $('input[name="順位点"]').on('change', repair_point);
-    $('input[name="順位点四捨五入あり"]').on('change', repair_point);
-    $('input[name="赤牌"]').on('change', function(){
-        let n = $(this).val();
-        if (isNaN(n) || n < 0 || 4 < n) $(this).val(0);
-    });
-    $('input[name="裏ドラあり"]').on('change', repair_gang);
-    $('input[name="カンドラあり"]').on('change', repair_gang);
-    $('input[name="役満の複合あり"]').on('change', repair_damanguan);
-
-    $('input[name="プリセット"]').on('click', ()=>{
-        let key = $('select[name="プリセット"]').val();
-        set_form(Majiang.rule(key == '-'
-                    ? JSON.parse(localStorage.getItem('Majiang.rule')||'{}')
-                    : preset[key] || {}));
-        unsaved();
-        return false;
-    });
-
-    $('form input').on('change', unsaved);
-
-    $('form').on('submit', ()=>{
-        if (! localStorage.getItem('Majiang.rule')) {
-            $('select[name="プリセット"]').append($('<option>')
-                                        .val('-').text('カスタムルール'));
+        for (let key of Object.keys(preset)) {
+            $('select[name="プリセット"]').append($('<option>').val(key).text(key));
         }
-        localStorage.setItem('Majiang.rule', JSON.stringify(get_form()));
+        if (localStorage.getItem('Majiang.rule')) {
+            $('select[name="プリセット"]').append($('<option>')
+                .val('-').text('カスタムルール'));
+            $('select[name="プリセット"]').val('-');
+        }
 
-        $(window).off('beforeunload');
-        $('select[name="プリセット"]').val('-');
-        Majiang.UI.Util.fadeIn($('form'));
-        Majiang.UI.Util.fadeIn($('.message'));
-        setTimeout(()=>$('.message').trigger('click'), 2000);
-        return false;
-    });
+        let rule = Majiang.rule(
+            JSON.parse(localStorage.getItem('Majiang.rule') || '{}'));
+        set_form(rule);
 
-    $('.message').on('click', function(){
-        Majiang.UI.Util.fadeOut($(this));
-        return false;
+        $('input[name="配給原点"]').on('change', function () {
+            let p = $(this).val();
+            if (isNaN(p) || p <= 0) $(this).val(Majiang.rule()['配給原点']);
+        });
+        $('input[name="順位点"]').on('change', repair_point);
+        $('input[name="順位点四捨五入あり"]').on('change', repair_point);
+        $('input[name="赤牌"]').on('change', function () {
+            let n = $(this).val();
+            if (isNaN(n) || n < 0 || 4 < n) $(this).val(0);
+        });
+        $('input[name="裏ドラあり"]').on('change', repair_gang);
+        $('input[name="カンドラあり"]').on('change', repair_gang);
+        $('input[name="役満の複合あり"]').on('change', repair_damanguan);
+
+        $('input[name="プリセット"]').on('click', () => {
+            let key = $('select[name="プリセット"]').val();
+            set_form(Majiang.rule(key == '-'
+                ? JSON.parse(localStorage.getItem('Majiang.rule') || '{}')
+                : preset[key] || {}));
+            unsaved();
+            return false;
+        });
+
+        $('form input').on('change', unsaved);
+
+        $('form').on('submit', () => {
+            if (!localStorage.getItem('Majiang.rule')) {
+                $('select[name="プリセット"]').append($('<option>')
+                    .val('-').text('カスタムルール'));
+            }
+            localStorage.setItem('Majiang.rule', JSON.stringify(get_form()));
+
+            $(window).off('beforeunload');
+            $('select[name="プリセット"]').val('-');
+            Majiang.UI.Util.fadeIn($('form'));
+            Majiang.UI.Util.fadeIn($('.message'));
+            setTimeout(() => $('.message').trigger('click'), 2000);
+            return false;
+        });
+
+        $('.message').on('click', function () {
+            Majiang.UI.Util.fadeOut($(this));
+            return false;
+        });
     });
-});
+}
